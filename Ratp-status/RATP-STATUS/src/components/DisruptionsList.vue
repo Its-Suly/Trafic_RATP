@@ -1,33 +1,3 @@
-<template>
-  <div class="dashboard">
-    <div class="dashboard-cards">
-      <div class="card info-card">
-        <h3>{{ activeTab === 'metro' ? 'Métro' : 'RER' }}</h3>
-        <div class="status-number">
-          {{ normalLinesCount }}/{{ totalLinesCount }}
-        </div>
-        <div class="status-text">
-          {{ disruptedLinesCount > 0 ? 'Lignes perturbées' : 'Lignes normales' }}
-        </div>
-      </div>
-
-      <div class="card update-card">
-        <h3>Mise à jour</h3>
-        <div class="update-time">{{ lastUpdate }}</div>
-        <div class="status-text">Actualisé automatiquement</div>
-      </div>
-    </div>
-
-    <div class="tabs">
-      <button :class="{ active: activeTab === 'metro' }" @click="activeTab = 'metro'">Métro</button>
-      <button :class="{ active: activeTab === 'rer' }" @click="activeTab = 'rer'">RER</button>
-    </div>
-
-    <MetroDisruptions v-if="activeTab === 'metro'" :disruptions="metroDisruptions" />
-    <RERDisruptions v-else :disruptions="rerDisruptions" />
-  </div>
-</template>
-
 <script lang="ts" setup>
 import { ref, onMounted, computed } from 'vue'
 import api from '@/services/api'
@@ -60,7 +30,20 @@ const rerLines = [
 ]
 
 const fetchDisruptions = async () => {
+  // ✅ Partie TEST ➡️ décommente pour tester sans API
+  /*
+  const data = {
+    disruptions: [
+      { lines: [{ name: "Métro 8", code: "M8" }], message: "Travaux en cours 🚧" },
+      { lines: [{ name: "Métro 3", code: "M3" }], message: "Retard de circulation ℹ️" },
+      { lines: [{ name: "RER B", code: "RERB" }], message: "Incident technique ❗" }
+    ]
+  };
+  */
+
+  // ✅ PROD : appel API réel
   const data = await api.getDisruptions()
+
   metroDisruptions.value = data.disruptions.filter((d: Disruption) => {
     const line = d.lines?.[0]?.code?.toLowerCase() || ''
     return line.startsWith('m')
@@ -100,63 +83,3 @@ onMounted(() => {
   setInterval(fetchDisruptions, 2 * 60 * 1000)
 })
 </script>
-
-<style scoped>
-.dashboard {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 16px;
-}
-
-.dashboard-cards {
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-.card {
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 12px 18px;
-  width: 160px;
-  text-align: center;
-  background: #fff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.status-number {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin: 8px 0;
-}
-
-.status-text {
-  color: #777;
-  font-size: 0.9rem;
-}
-
-.tabs {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-.tabs button {
-  padding: 10px 20px;
-  border: 1px solid #ccc;
-  background: white;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.tabs button.active {
-  background: #007bff;
-  color: white;
-  border-color: #007bff;
-}
-
-.tabs button:not(:last-child) {
-  border-right: none;
-}
-</style>
