@@ -31,7 +31,7 @@ const rerLines = [
 
 const fetchDisruptions = async () => {
   // ✅ Partie TEST ➡️ décommente pour tester sans API
-  /*
+  
   const data = {
     disruptions: [
       { lines: [{ name: "Métro 8", code: "M8" }], message: "Travaux en cours 🚧" },
@@ -39,7 +39,7 @@ const fetchDisruptions = async () => {
       { lines: [{ name: "RER B", code: "RERB" }], message: "Incident technique ❗" }
     ]
   };
-  */
+  
 
   // ✅ PROD : appel API réel
   const data = await api.getDisruptions()
